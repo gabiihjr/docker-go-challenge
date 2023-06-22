@@ -1,13 +1,13 @@
-FROM golang:1.20
+FROM golang:1.20 as builder
 
 WORKDIR /usr/src/app
 
-COPY go.mod go.sum ./
-
-RUN go mod download && go mod verify
-
 COPY . .
 
-RUN go build -v -o /usr/local/bin/app ./...
+RUN CGO_ENABLED=0 go build -o /app main.go
 
-CMD ["app"]
+FROM scratch
+
+COPY --from=builder /app /app
+
+CMD ["/app"]
